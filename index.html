@@ -1,46 +1,88 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jogadores - Rodadas</title>
-  <script src="https://unpkg.com/tabletop@1.6.0/tabletop.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jogadores</title>
   <style>
-    body { font-family: sans-serif; margin: 2rem; background: #f0f0f0; }
-    h1 { margin-bottom: 1rem; }
-    .jogador { background: #fff; border-radius: 8px; padding: 1rem; margin-bottom: 0.5rem; box-shadow: 0 0 4px rgba(0,0,0,0.1); }
-    .jogador img { width: 40px; height: 40px; border-radius: 50%; margin-right: 1rem; }
-    .jogador-line { display: flex; align-items: center; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #jogadores {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .jogador {
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+    }
+    .nota {
+      font-weight: bold;
+      color: #007BFF;
+    }
   </style>
 </head>
 <body>
   <h1>Jogadores</h1>
-  <div id="lista-jogadores"></div>
+  <div id="jogadores">Carregando dados...</div>
 
   <script>
-    const sheetURL = 'https://docs.google.com/spreadsheets/d/1DSpzimTw_mpUiQKNYjRv-xsTjUkqrQJtj26trdZUfL8/edit?usp=sharing';
+    // ID da sua planilha
+    const sheetId = '1DSpzimTw_mpUiQKNYjRv-xsTjUkqrQJtj26trdZUfL8';
 
-    Tabletop.init({
-      key: sheetURL,
-      simpleSheet: false,
-      wanted: ["Jogadores"],
-      callback: function(data, tabletop) {
-        const jogadores = tabletop.sheets("Jogadores").elements;
-        const container = document.getElementById("lista-jogadores");
+    // Nome da aba correta — confirme o nome exato no seu Sheets
+    const sheetName = 'Jogadores';
 
-        jogadores.forEach(j => {
-          const div = document.createElement("div");
-          div.className = "jogador";
-          div.innerHTML = `
-            <div class="jogador-line">
-              <img src="${j.Foto}" alt="${j.Nome}">
-              <strong>${j.Nome}</strong>
-            </div>
-          `;
+    // URL para buscar os dados no formato JSON da planilha
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+
+    fetch(url)
+      .then(res => res.text())
+      .then(data => {
+        // A API do Google Sheets retorna um texto estranho, temos que tratar para virar JSON válido
+        const json = JSON.parse(data.substr(47).slice(0, -2));
+        const container = document.getElementById('jogadores');
+        container.innerHTML = '';
+
+        if(!json.table.rows.length) {
+          container.innerText = 'Nenhum jogador cadastrado.';
+          return;
+        }
+
+        json.table.rows.forEach(row => {
+          // A coluna 1 da planilha é ID, 2 é Nome, 3 é Foto, 4 é MédiaEstrelas etc.
+          // Ajuste aqui de acordo com sua planilha
+
+          const nome = row.c[1]?.v || 'Sem nome';      // Coluna B = Nome
+          const media = row.c[3]?.v || 0;              // Coluna D = MédiaEstrelas
+
+          // Monta o card do jogador
+          const div = document.createElement('div');
+          div.className = 'jogador';
+          div.innerHTML = `<span>${nome}</span><span class="nota">${media.toFixed(1)} ⭐</span>`;
+
           container.appendChild(div);
         });
-      }
-    });
+      })
+      .catch(err => {
+        document.getElementById('jogadores').innerText = 'Erro ao carregar os dados.';
+        console.error('Erro:', err);
+      });
   </script>
 </body>
 </html>
