@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogadores - Rodadas</title>
+  <script src="https://unpkg.com/tabletop@1.6.0/tabletop.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; background: #f0f0f0; }
+    h1 { margin-bottom: 1rem; }
+    .jogador { background: #fff; border-radius: 8px; padding: 1rem; margin-bottom: 0.5rem; box-shadow: 0 0 4px rgba(0,0,0,0.1); }
+    .jogador img { width: 40px; height: 40px; border-radius: 50%; margin-right: 1rem; }
+    .jogador-line { display: flex; align-items: center; }
+  </style>
+</head>
+<body>
+  <h1>Jogadores</h1>
+  <div id="lista-jogadores"></div>
+
+  <script>
+    const sheetURL = 'https://docs.google.com/spreadsheets/d/1DSpzimTw_mpUiQKNYjRv-xsTjUkqrQJtj26trdZUfL8/edit?usp=sharing';
+
+    Tabletop.init({
+      key: sheetURL,
+      simpleSheet: false,
+      wanted: ["Jogadores"],
+      callback: function(data, tabletop) {
+        const jogadores = tabletop.sheets("Jogadores").elements;
+        const container = document.getElementById("lista-jogadores");
+
+        jogadores.forEach(j => {
+          const div = document.createElement("div");
+          div.className = "jogador";
+          div.innerHTML = `
+            <div class="jogador-line">
+              <img src="${j.Foto}" alt="${j.Nome}">
+              <strong>${j.Nome}</strong>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
